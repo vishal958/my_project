@@ -1,4 +1,4 @@
-{% extends "blog/base.html" %} {% block content %}
+{% extends "blog/base.html" %}{% load crispy_forms_tags %} {% block content %}
 <article class="media content-section">
     <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
     <div class="media-body">
@@ -13,6 +13,20 @@
         </div>
         <h2 class="article-title">{{ object.title }}</h2>
         <p class="article-content">{{ object.content }}</p>
+        <h3>Leave a comment:</h3>
+        <div>
+            <form method="POST" class="post-form">{% csrf_token %} {{ form|crispy }}
+                <button type="submit" class="save btn btn-default">Comment</button>
+            </form>
+        </div>
+        <h3>Comments:</h3>
+        {% for comment in comments %}
+        <p>
+            On {{comment.created_on.date }}&nbsp;
+            <b>{{ comment.author }}</b> wrote:
+        </p>
+        {{ comment.body }}
+        <hr> {% endfor %}
     </div>
 </article>
 {% endblock content %}

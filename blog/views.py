@@ -1,8 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .models import Post
+from django.urls import reverse
+from .models import Post, Comment
+from .forms import CommentForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic.edit import FormMixin
 
 
 posts = [
@@ -46,8 +49,34 @@ class PostListView(ListView):
     ordering = ['-date_posted']
 
 
-class PostDetailView(DetailView):
+class PostDetailView(FormMixin, DetailView):
     model = Post
+    #template_name = 'blog/post_detail.html'
+    form_class = CommentForm
+
+    def get_success_url(self):
+        return reverse('post-detail', kwargs={'pk': self.object.id})
+
+    def get_context_data(self, **kwargs):
+        context = super(PostDetailView, self).get_context_data(**kwargs)
+        context['form'] = CommentForm(initial={'post': self.object})
+        context['temp'] = 'hi'
+        comments = Comment.objects.filter(post=self.object)
+        print(comments)
+        context['comments'] = comments
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        form.save()
+        return super(PostDetailView, self).form_valid(form)
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
