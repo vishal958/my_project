@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Profile
+from .models import Profile, balance
 
 
 class UserRegisterForm(UserCreationForm):
@@ -34,3 +34,13 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['image']
+
+
+class VirtualWalletForm(forms.ModelForm):
+    username = forms.CharField(
+        max_length=30, required=False, help_text='Please provide your friends username')
+    amount = forms.IntegerField(help_text='Enter the amount you want to send')
+
+    class Meta:
+        model = balance
+        fields = ['username', 'amount']
