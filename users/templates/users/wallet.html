@@ -1,0 +1,20 @@
+{% extends "blog/base.html" %}{% load crispy_forms_tags %} {% block content %}
+<legend class="border-bottom mb-4">Hello <b>{{request.user.username}}</b> you can send you wallet balance to your friends</legend>
+{% if msg%}
+<br><br> {{msg}}<br> {% endif %}
+<span>Total Wallet Balance</span>:<b> {{balance}}</b>
+<br><br>
+
+<form method="POST" enctype="multipart/form-data">
+    <!--enctype for handling image data-->
+    {% csrf_token %}
+    <fieldset class="form-group">
+        <!-- {{ form.as_p }} -->
+        {{ u_form|crispy }}
+    </fieldset>
+    <div class="form-group">
+        <button class="btn btn-outline-info" type="submit">Send</button>
+    </div>
+</form>
+<br><br>
+<a href="{% url 'logout' %}">logout</a> {% endblock %}

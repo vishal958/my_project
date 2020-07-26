@@ -19,3 +19,8 @@ class Profile(models.Model):
             output_size = (300, 300)
             img.thumbnail(output_size)
             img.save(self.image.path)
+
+
+class balance(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    balance = models.IntegerField(default=0)
