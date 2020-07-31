@@ -24,3 +24,6 @@ class Profile(models.Model):
 class balance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     balance = models.IntegerField(default=0)
+
+    def __str__(self):
+        return str(self.user.username)+' : '+str(self.balance)

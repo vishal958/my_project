@@ -1,12 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.urls import reverse
-from .models import Post, Comment
+from .models import Post, Comment, Preference
 from .forms import CommentForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.edit import FormMixin
-
+from django.contrib.auth.decorators import login_required
 
 posts = [
     {
@@ -51,7 +51,7 @@ class PostListView(ListView):
 
 class PostDetailView(FormMixin, DetailView):
     model = Post
-    #template_name = 'blog/post_detail.html'
+    # template_name = 'blog/post_detail.html'
     form_class = CommentForm
 
     def get_success_url(self):
@@ -60,10 +60,23 @@ class PostDetailView(FormMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(PostDetailView, self).get_context_data(**kwargs)
         context['form'] = CommentForm(initial={'post': self.object})
-        context['temp'] = 'hi'
         comments = Comment.objects.filter(post=self.object)
-        print(comments)
+        loggedInUserPreference = False
+        if self.request.user.is_authenticated:
+            loggedInUserPreference = Preference.objects.filter(user=self.request.user,
+                                                            post=self.object)
+        # print(self.object.likes)
+        if loggedInUserPreference:
+            # For like=1 ,dislike =2 for each user.
+            context['preference'] = (loggedInUserPreference[0].value)
+
+        #print(comments)
+        # Total number of comments to the Post.
         context['comments'] = comments
+        # Total number of likes to the Post.
+        context['likes'] = self.object.likes
+        # Total number of likes to the Post.
+        context['dislikes'] = self.object.dislikes
         return context
 
     def post(self, request, *args, **kwargs):
@@ -116,3 +129,59 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 def about(request):
     return render(request, 'blog/about.html', {'title': 'About'})
+
+
+
+@login_required
+def postpreference(request):
+    if request.method == "GET":
+        postid = request.GET['post_id']
+        userpreference = request.GET['userpreference']
+        object = get_object_or_404(Post, id=postid)
+        obj = ''
+        valueobj = ''
+        try:
+            obj = Preference.objects.get(
+                user=request.user, post=object)
+            valueobj = obj.value  # value of userpreference
+            valueobj = int(valueobj)
+            userpreference = int(userpreference)
+            if valueobj != userpreference:
+                obj.delete()
+                upref = Preference()
+                upref.user = request.user
+                upref.post = object
+                upref.value = userpreference
+                if userpreference == 1 and valueobj != 1:
+                    object.likes += 1
+                    object.dislikes -= 1
+                elif userpreference == 2 and valueobj != 2:
+                    object.dislikes += 1
+                    object.likes -= 1
+                upref.save()
+                object.save()
+            elif valueobj == userpreference:
+                obj.delete()
+                if userpreference == 1:
+                    object.likes -= 1
+                elif userpreference == 2:
+                    object.dislikes -= 1
+                object.save()
+                return HttpResponse("Success!")  # Sending an success response
+
+        except Preference.DoesNotExist:
+            upref = Preference()
+            upref.user = request.user
+            upref.post = object
+            upref.value = userpreference
+            userpreference = int(userpreference)
+            if userpreference == 1:
+                object.likes += 1
+            elif userpreference == 2:
+                object.dislikes += 1
+            upref.save()
+            object.save()
+    else:
+        print('clcicked2')
+        object = get_object_or_404(Post, id=postid)
+        return HttpResponse("Request method is not a GET")
