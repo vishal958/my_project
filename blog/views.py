@@ -69,8 +69,6 @@ class PostDetailView(FormMixin, DetailView):
         if loggedInUserPreference:
             # For like=1 ,dislike =2 for each user.
             context['preference'] = (loggedInUserPreference[0].value)
-
-        #print(comments)
         # Total number of comments to the Post.
         context['comments'] = comments
         # Total number of likes to the Post.
@@ -131,7 +129,6 @@ def about(request):
     return render(request, 'blog/about.html', {'title': 'About'})
 
 
-
 @login_required
 def postpreference(request):
     if request.method == "GET":
@@ -160,6 +157,7 @@ def postpreference(request):
                     object.likes -= 1
                 upref.save()
                 object.save()
+                return HttpResponse("Success!")  # Sending an success response
             elif valueobj == userpreference:
                 obj.delete()
                 if userpreference == 1:
@@ -181,7 +179,8 @@ def postpreference(request):
                 object.dislikes += 1
             upref.save()
             object.save()
+            return HttpResponse("Success!")  # Sending an success response
     else:
-        print('clcicked2')
         object = get_object_or_404(Post, id=postid)
+        # Sending an success response
         return HttpResponse("Request method is not a GET")
