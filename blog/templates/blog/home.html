@@ -15,10 +15,14 @@
                     <p class="article-content">{{ post.content }}</p>
 
                     {% if user.is_authenticated %}
-                        <i class="likebutton like-dislike fa fa-thumbs-o-up" id="postlike-{{post.id}}" href="#" data-preference="{{preference }}" data-catid="{{ post.id }}"></i>
+                        <a href="/post/{{ post.id }}">
+                            <i class="likebutton like-dislike fa fa-thumbs-o-up" id="postlike-{{post.id}}" href="#" data-catid="{{ post.id }}"></i>
+                        </a>
                         <span class="like">{{post.likes}}</span>
 
-                        <i class="dlikebutton like-dislike  fa fa-thumbs-o-down" id="postdlike-{{post.id}}" href="#" data-preference="{{preference }}" data-catid="{{ post.id }}"></i>
+                        <a href="/post/{{post.id}}">
+                            <i class="dlikebutton like-dislike  fa fa-thumbs-o-down" id="postdlike-{{post.id}}" href="#" data-catid="{{ post.id }}"></i>
+                        </a>
                         <span class="dislike">{{post.dislikes}}</span>
                     {% else %}
                         <a href="/login/?next=/post/{{ post.id }}">
