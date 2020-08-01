@@ -1,4 +1,5 @@
 # Blogging App
+## You can visit this app at https://karobakchodi.herokuapp.com. Sometimes add will popup, because it is hosted freely. So please bare with this.
 This is the blogging app where you can.
  ##  Register
 ![alt text](https://github.com/vishal958/my_project/blob/master//images/register.PNG)
