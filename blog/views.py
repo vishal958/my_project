@@ -45,6 +45,27 @@ def home(request):
 class PostListView(ListView):
     model = Post
     template_name = 'blog/home.html'
+    def get_context_data(self, **kwargs):
+        context = super(PostListView, self).get_context_data(**kwargs)
+        loggedInUserPreference = False
+        if self.request.user.is_authenticated:
+            loggedInUserPreference = Preference.objects.filter(user=self.request.user)
+                                                            
+        tags = Post.objects.all()  
+        t=[]    
+        for tag in tags:
+            t.append(tag.id)                              
+        i=0
+        pref= {}
+        j=0
+        if loggedInUserPreference:
+            for preference in loggedInUserPreference:
+                pref[t[j]]=preference.value
+                j=j+1
+            
+             
+        context['preference']=pref
+        return context
     context_object_name = 'posts'
     ordering = ['-date_posted']
 

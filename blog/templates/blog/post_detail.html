@@ -1,120 +1,134 @@
-{% extends "blog/base.html" %}{% load crispy_forms_tags %} {% block content %}
-<article class="media content-section">
-    <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
-    <div class="media-body">
-        <div class="article-metadata">
-            <!-- <p id="message"></p> -->
-            <a class="mr-2" href="#">{{ object.author }}</a>
-            <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small> {% if object.author == user %}
-            <div>
-                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Update</a>
-                <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' object.id %}">Delete</a>
+{% extends "blog/base.html" %}{% load crispy_forms_tags %}
+{% block content %}
+    <article class="media content-section">
+        <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
+        <div class="media-body">
+            <div class="article-metadata">
+
+                <a class="mr-2" href="#">{{ object.author }}</a>
+                <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
+                {% if object.author == user %}
+                    <div>
+                        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Update</a>
+                        <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' object.id %}">Delete</a>
+                    </div>
+                {% endif %}
             </div>
-            {% endif %}
-        </div>
-        <h2 class="article-title">{{ object.title }}</h2>
-        <p class="article-content">{{ object.content }}</p>
+            <h2 class="article-title">{{ object.title }}</h2>
+            <p class="article-content">{{ object.content }}</p>
 
+            {% if user.is_authenticated %}
+                <i class="likebutton like-dislike fa fa-thumbs-o-up authenticated" id="like{{post.id}}" href="#" data-preference="{{preference }}" data-catid="{{ object.id }}"></i>
+                <span class="like">{{object.likes}}</span>
 
-        {% if user.is_authenticated %}
-        <a class="likebutton like-dislike" id="like{{post.id}}" href="#" data-preference="{{preference }}" data-catid="{{ object.id }}">Like</a>
-        <span class="like">{{object.likes}}</span>
-        <br>
-        <a class="dlikebutton like-dislike" id="like{{post.id}}" href="#" data-preference="{{preference }}" data-catid="{{ object.id }}">DisLike</a>
-        <span class="dislike">{{object.dislikes}}</span> {% else %}
-        <a class="like-dislike" id="like{{post.id}}" href="/login/?next=/post/{{ object.id }}" data-catid="{{ object.id }}">Like</a>
-        <span class="like">{{object.likes}}</span>
-        <br>
-        <a class="like-dislike" id="like{{post.id}}" href="/login/?next=/post/{{ object.id }}" data-catid="{{ object.id }}">DisLike</a>
-        <span class="dislike">{{object.dislikes}}</span>{% endif %}
+                <i class="dlikebutton like-dislike  fa fa-thumbs-o-down authenticated" id="like{{post.id}}" href="#" data-preference="{{preference }}" data-catid="{{ object.id }}"></i>
+                <span class="dislike">{{object.dislikes}}</span>
+            {% else %}
+                <a href="/login/?next=/post/{{ object.id }}">
+                    <i class="likebutton like-dislike  fa fa-thumbs-o-up" id="like{{post.id}}" data-catid="{{ object.id }}"></i>
+                </a>
+                <span class="like">{{object.likes}}</span>
+                <a href="/login/?next=/post/{{ object.id }}">
+                    <i class="likebutton like-dislike  fa fa-thumbs-o-down" id="like{{post.id}}" data-catid="{{ object.id }}"></i>
+                </a>
+                <span class="dislike">{{object.dislikes}}</span>{% endif %}
+            <p id="message"></p>
+            <h3>Leave a comment:</h3>
+            <div>
+                <form method="POST" class="post-form">{% csrf_token %}
+                    {{ form|crispy }}{{ u_form|crispy }}
+                    <button type="submit" class="save btn btn-default">Comment</button>
+                </form>
+            </div>
+            <h3>Comments:</h3>
+            {% for comment in comments %}
+                <p>
+                    On
+                    {{comment.created_on.date }}&nbsp;
+                    <b>{{ comment.author }}</b>
+                    wrote:
+                </p>
+                {{ comment.body }}
+                <hr>
+            {% endfor %}
+            <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+            <script>
+                jQuery(document).ready(function () {
+                    $('.likebutton').click(function () {
+                        var catid;
+                        catid = $(this).attr("data-catid");
+                        var preference = parseInt($(this).attr("data-preference"));
+                        var like = parseInt($('.like').text())
+                        var dislike = parseInt($('.dislike').text())
+                        $.ajax({
+                            type: "GET",
+                            url: "/likepost",
+                            data: {
+                                post_id: catid,
+                                userpreference: 1
+                            },
+                            success: function (data) {
+                                if (preference == 1) {
+                                    $('.like').text(like - 1);
+                                    $('.like-dislike').attr("data-preference", '0');
+                                    $('#message').text('');
 
+                                } else if (preference == 2) {
 
-
-        <h3>Leave a comment:</h3>
-        <div>
-            <form method="POST" class="post-form">{% csrf_token %} {{ form|crispy }}{{ u_form|crispy }}
-                <button type="submit" class="save btn btn-default">Comment</button>
-            </form>
-        </div>
-        <h3>Comments:</h3>
-        {% for comment in comments %}
-        <p>
-            On {{comment.created_on.date }}&nbsp;
-            <b>{{ comment.author }}</b> wrote:
-        </p>
-        {{ comment.body }}
-        <hr> {% endfor %}
-        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-        <script>
-            jQuery(document).ready(function () {
-                $('.likebutton').click(function () {
-                    var catid;
-                    catid = $(this).attr("data-catid");
-                    var preference = parseInt($(this).attr("data-preference"));
-                    var like = parseInt($('.like').text())
-                    var dislike = parseInt($('.dislike').text())
-                    $.ajax({
-                        type: "GET",
-                        url: "/likepost",
-                        data: {
-                            post_id: catid,
-                            userpreference: 1
-                        },
-                        success: function (data) {
-                            if (preference == 1) {
-                                $('.like').text(like - 1);
-                                $('.like-dislike').attr("data-preference", '0');
-
-                            } else if (preference == 2) {
-
-                                $('.dislike').text(dislike - 1);
-                                $('.like').text(like + 1);
-                                $('.like-dislike').attr("data-preference", '1');
-                            } else {
-                                $('.like').text(like + 1);
-                                $('.like-dislike').attr("data-preference", '1');
+                                    $('.dislike').text(dislike - 1);
+                                    $('.like').text(like + 1);
+                                    $('.like-dislike').attr("data-preference", '1');
+                                    $('#message').html('Thank you very much for liking my Post &#128525;');
+                                    $('#message').css('color', 'green');
+                                } else {
+                                    $('.like').text(like + 1);
+                                    $('.like-dislike').attr("data-preference", '1');
+                                    $('#message').html('Thank you very much for liking my Post &#128525;');
+                                    $('#message').css('color', 'green');
+                                }
                             }
-                            $('#message').text('You liked the Post');
-                        }
-                    })
+                        })
 
-                });
-                $('.dlikebutton').click(function () {
+                    });
+                    $('.dlikebutton').click(function () {
 
-                    var catid;
-                    catid = $(this).attr("data-catid");
-                    var preference = parseInt($(this).attr("data-preference"));
-                    var like = parseInt($('.like').text())
-                    var dislike = parseInt($('.dislike').text())
-                    $.ajax({
-                        type: "GET",
-                        url: "/likepost",
-                        data: {
-                            post_id: catid,
-                            userpreference: 2
-                        },
-                        success: function (data) {
-                            if (preference == 1) {
-                                $('.like').text(like - 1);
-                                $('.like-dislike').attr("data-preference", '2');
-                                $('.dislike').text(dislike + 1);
+                        var catid;
+                        catid = $(this).attr("data-catid");
+                        var preference = parseInt($(this).attr("data-preference"));
+                        var like = parseInt($('.like').text())
+                        var dislike = parseInt($('.dislike').text())
+                        $.ajax({
+                            type: "GET",
+                            url: "/likepost",
+                            data: {
+                                post_id: catid,
+                                userpreference: 2
+                            },
+                            success: function (data) {
+                                if (preference == 1) {
+                                    $('.like').text(like - 1);
+                                    $('.like-dislike').attr("data-preference", '2');
+                                    $('.dislike').text(dislike + 1);
+                                    $('#message').html('Please provide some comments so that I can give you better next time &#128528;');
+                                    $('#message').css('color', 'red');
 
-                            } else if (preference == 2) {
+                                } else if (preference == 2) {
 
-                                $('.dislike').text(dislike - 1);
-                                $('.like-dislike').attr("data-preference", '0');
-                            } else {
-                                $('.dislike').text(dislike + 1);
-                                $('.like-dislike').attr("data-preference", '2');
+                                    $('.dislike').text(dislike - 1);
+                                    $('.like-dislike').attr("data-preference", '0');
+                                    $('#message').text('');
+                                } else {
+                                    $('.dislike').text(dislike + 1);
+                                    $('.like-dislike').attr("data-preference", '2');
+                                    $('#message').html('Please provide some comments so that I can give you better next time &#128528;');
+                                    $('#message').css('color', 'red');
+                                }
                             }
-                            $('#message').text('You disliked the Post');
-                        }
-                    })
+                        })
 
-
+                    });
                 });
-            });
-        </script>
-    </div>
-</article>
+            </script>
+        </div>
+    </article>
 {% endblock content %}

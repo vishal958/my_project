@@ -1,15 +1,51 @@
-{% extends "blog/base.html" %} {% block content %} {% for post in posts %}
-<article class="media content-section">
-    <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
-    <div class="media-body">
-        <div class="article-metadata">
-            <a class="mr-2" href="#">{{ post.author }}</a>
-            <small class="text-muted">{{ post.date_posted }}</small>
-        </div>
-        <h2><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h2>
-        <p class="article-content">{{ post.content }}</p>
-        <p class="article-content">Likes {{ post.likes }}</p>
-        <p class="article-content">Dislikes {{ post.dislikes }}</p>
-    </div>
-</article>
-{% endfor %} {% endblock content %}
+{% extends "blog/base.html" %}
+{% block content %}
+    {% for post in posts %}
+        <a class="more" href="{% url 'post-detail' post.id %}">
+            <article class="media content-section">
+                <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <a class="mr-2" href="#">{{ post.author }}</a>
+                        <small class="text-muted">{{ post.date_posted }}</small>
+                    </div>
+                    <h2>
+                        <a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a>
+                    </h2>
+                    <p class="article-content">{{ post.content }}</p>
+
+                    {% if user.is_authenticated %}
+                        <i class="likebutton like-dislike fa fa-thumbs-o-up" id="postlike-{{post.id}}" href="#" data-preference="{{preference }}" data-catid="{{ object.id }}"></i>
+                        <span class="like">{{post.likes}}</span>
+
+                        <i class="dlikebutton like-dislike  fa fa-thumbs-o-down" id="postdlike-{{post.id}}" href="#" data-preference="{{preference }}" data-catid="{{ object.id }}"></i>
+                        <span class="dislike">{{post.dislikes}}</span>
+                    {% else %}
+                        <a href="/login/?next=/post/{{ object.id }}">
+                            <i class="likebutton like-dislike  fa fa-thumbs-o-up" id="like{{post.id}}" data-catid="{{ object.id }}"></i>
+                        </a>
+                        <span class="like">{{post.likes}}</span>
+                        <a href="/login/?next=/post/{{ object.id }}">
+                            <i class="likebutton like-dislike  fa fa-thumbs-o-down" id="like{{post.id}}" data-catid="{{ object.id }}"></i>
+                        </a>
+                        <span class="dislike">{{post.dislikes}}</span>{% endif %}
+                    <a class="more" href="{% url 'post-detail' post.id %}">View blog in detail to (like,dislike and comments)</a>
+                </div>
+
+            </article>
+        </a>
+    {% endfor %}
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script>
+        var preference_dict = {{preference}};
+        let liked_post = Object.keys(preference_dict).filter(k => preference_dict[k] === 1);
+        let disliked_post = Object.keys(preference_dict).filter(k => preference_dict[k] === 2);
+        for (var i = 0; i < liked_post.length; i++) {
+            $('#postlike-' + liked_post[i]).css('color', 'green');
+        }
+        for (var i = 0; i < disliked_post.length; i++) {
+            $('#postdlike-' + disliked_post[i]).css('color', 'red');
+
+        }
+    </script>
+{% endblock content %}
