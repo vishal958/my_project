@@ -50,17 +50,11 @@ class PostListView(ListView):
         loggedInUserPreference = False
         if self.request.user.is_authenticated:
             loggedInUserPreference = Preference.objects.filter(user=self.request.user)
-                                                            
-        tags = Post.objects.all()  
-        t=[]    
-        for tag in tags:
-            t.append(tag.id)                              
-        i=0
         pref= {}
         j=0
         if loggedInUserPreference:
             for preference in loggedInUserPreference:
-                pref[t[j]]=preference.value
+                pref[preference.post.id]=preference.value
                 j=j+1
             
              
