@@ -21,6 +21,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # During devel
 ENV = False
 dotenv_file = os.path.join(BASE_DIR, ".env")
 if os.path.isfile(dotenv_file):
+    dotenv.load_dotenv(dotenv_file)
     ENV = True
     # dotenv.load_dotenv(dotenv_file)
     DATABASES = {
@@ -38,7 +39,7 @@ else:
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '=kx7xuzlbrfzyjtvx$(s^*my0&4x0+&5-5e5_6osvuvokfn@5)'
+SECRET_KEY = os.environ['secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
