@@ -1,5 +1,6 @@
 {% extends "blog/base.html" %}
 {% block content %}
+
     {% for post in posts %}
         <a class="more" href="{% url 'post-detail' post.id %}">
             <article class="media content-section">
@@ -16,21 +17,21 @@
 
                     {% if user.is_authenticated %}
                         <a href="/post/{{ post.id }}">
-                            <i class="likebutton like-dislike fa fa-thumbs-o-up" id="postlike-{{post.id}}" href="#" data-catid="{{ post.id }}"></i>
+                            <i class="likebutton  fa fa-thumbs-o-up" id="postlike-{{post.id}}" href="#" data-catid="{{ post.id }}"></i>
                         </a>
                         <span class="like">{{post.likes}}</span>
 
                         <a href="/post/{{post.id}}">
-                            <i class="dlikebutton like-dislike  fa fa-thumbs-o-down" id="postdlike-{{post.id}}" href="#" data-catid="{{ post.id }}"></i>
+                            <i class="dlikebutton  fa fa-thumbs-o-down" id="postdlike-{{post.id}}" href="#" data-catid="{{ post.id }}"></i>
                         </a>
                         <span class="dislike">{{post.dislikes}}</span>
                     {% else %}
                         <a href="/login/?next=/post/{{ post.id }}">
-                            <i class="likebutton like-dislike  fa fa-thumbs-o-up" id="like{{post.id}}" data-catid="{{ post.id }}"></i>
+                            <i class="likebutton   fa fa-thumbs-o-up" id="like{{post.id}}" data-catid="{{ post.id }}"></i>
                         </a>
                         <span class="like">{{post.likes}}</span>
                         <a href="/login/?next=/post/{{ post.id }}">
-                            <i class="likebutton like-dislike  fa fa-thumbs-o-down" id="like{{post.id}}" data-catid="{{ post.id }}"></i>
+                            <i class="likebutton    fa fa-thumbs-o-down" id="like{{post.id}}" data-catid="{{ post.id }}"></i>
                         </a>
                         <span class="dislike">{{post.dislikes}}</span>{% endif %}
                     <a class="more" href="{% url 'post-detail' post.id %}">View blog in detail to (like,dislike and comments)</a>
@@ -39,17 +40,15 @@
             </article>
         </a>
     {% endfor %}
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script>
         var preference_dict = {{preference}};
         let liked_post = Object.keys(preference_dict).filter(k => preference_dict[k] === 1);
         let disliked_post = Object.keys(preference_dict).filter(k => preference_dict[k] === 2);
         for (var i = 0; i < liked_post.length; i++) {
-            $('#postlike-' + liked_post[i]).css('color', 'green');
+            document.getElementById('postlike-' + liked_post[i]).style.color = 'green';
         }
         for (var i = 0; i < disliked_post.length; i++) {
-            $('#postdlike-' + disliked_post[i]).css('color', 'red');
-
+            document.getElementById('postdlike-' + disliked_post[i]).style.color = 'red';
         }
     </script>
 {% endblock content %}
