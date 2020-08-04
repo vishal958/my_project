@@ -11,6 +11,8 @@ from .models import balance
 
 
 def register(request):
+    if request.user.is_authenticated:
+         return redirect('blog-home')
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
@@ -24,8 +26,8 @@ def register(request):
             # messages.success(request, f'Account created for {username}!')
             # return redirect('blog-home')
             messages.success(
-                request, f'Your account has been created! You are now able to log in')
-            return redirect('login')
+                request, f'Your account has been created! You are now loggedIn')
+            return redirect('blog-home')
     else:
         form = UserRegisterForm()
     return render(request, 'users/register.html', {'form': form})
